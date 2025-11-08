@@ -53,6 +53,29 @@ function App() {
     })
   }, [players, courtPlayers, pendingSubstitutions])
 
+  // Reconcile player onCourt status with courtPlayers to ensure consistency
+  useEffect(() => {
+    // Get all player IDs currently on court
+    const playersOnCourt = new Set(
+      Object.values(courtPlayers)
+        .filter(p => p !== null)
+        .map(p => p.id)
+    )
+
+    // Update any players whose onCourt status doesn't match reality
+    const needsUpdate = players.some(p => {
+      const shouldBeOnCourt = playersOnCourt.has(p.id)
+      return p.onCourt !== shouldBeOnCourt
+    })
+
+    if (needsUpdate) {
+      setPlayers(players.map(p => ({
+        ...p,
+        onCourt: playersOnCourt.has(p.id)
+      })))
+    }
+  }, [courtPlayers, players])
+
   const addPlayer = (playerName) => {
     if (playerName.trim()) {
       const newPlayer = {
