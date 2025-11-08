@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AddPlayer from './components/AddPlayer'
 import Court from './components/Court'
 import Bench from './components/Bench'
@@ -6,17 +6,51 @@ import SubstitutionManager from './components/SubstitutionManager'
 import './App.css'
 
 const POSITIONS = ['Point Guard', 'Shooting Guard', 'Small Forward', 'Power Forward', 'Center']
+const STORAGE_KEY = 'basketball-sub-data'
+
+// Helper functions for localStorage
+const loadFromStorage = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (error) {
+    console.error('Error loading from localStorage:', error)
+  }
+  return null
+}
+
+const saveToStorage = (data) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  } catch (error) {
+    console.error('Error saving to localStorage:', error)
+  }
+}
 
 function App() {
-  const [players, setPlayers] = useState([])
-  const [courtPlayers, setCourtPlayers] = useState({
+  // Load initial state from localStorage
+  const savedData = loadFromStorage()
+
+  const [players, setPlayers] = useState(savedData?.players || [])
+  const [courtPlayers, setCourtPlayers] = useState(savedData?.courtPlayers || {
     'Point Guard': null,
     'Shooting Guard': null,
     'Small Forward': null,
     'Power Forward': null,
     'Center': null
   })
-  const [pendingSubstitutions, setPendingSubstitutions] = useState([])
+  const [pendingSubstitutions, setPendingSubstitutions] = useState(savedData?.pendingSubstitutions || [])
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    saveToStorage({
+      players,
+      courtPlayers,
+      pendingSubstitutions
+    })
+  }, [players, courtPlayers, pendingSubstitutions])
 
   const addPlayer = (playerName) => {
     if (playerName.trim()) {
