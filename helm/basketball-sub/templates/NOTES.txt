@@ -1,0 +1,40 @@
+1. Application deployed successfully!
+
+{{- if .Values.ingress.enabled }}
+2. Your application is accessible via Ingress at:
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- else if .Values.gateway.enabled }}
+2. Your application is accessible via Gateway at:
+{{- range .Values.gateway.hostnames }}
+  http{{ if $.Values.gateway.tls.enabled }}s{{ end }}://{{ . }}
+{{- end }}
+{{- else if eq .Values.service.type "NodePort" }}
+2. Your application is accessible via NodePort at:
+  export NODE_PORT={{ .Values.service.nodePort }}
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if eq .Values.service.type "LoadBalancer" }}
+2. Your application will be accessible via LoadBalancer:
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+
+  You can watch the status by running:
+  kubectl get svc --namespace {{ .Release.Namespace }} -w {{ include "basketball-sub.fullname" . }}
+
+  Once available, access your app at:
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "basketball-sub.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else }}
+2. Your application is accessible via ClusterIP (internal only):
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "basketball-sub.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:80
+
+  Then visit http://127.0.0.1:8080
+{{- end }}
+
+3. Get the application status:
+  kubectl get all --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }}"
+
+4. View application logs:
+  kubectl logs --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "basketball-sub.name" . }}" --tail=100 -f

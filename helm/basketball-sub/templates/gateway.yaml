@@ -1,0 +1,45 @@
+{{- if .Values.gateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "basketball-sub.fullname" . }}
+  labels:
+    {{- include "basketball-sub.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gateway.gatewayName }}
+    namespace: {{ .Values.gateway.gatewayNamespace }}
+  hostnames:
+  {{- range .Values.gateway.hostnames }}
+  - {{ . | quote }}
+  {{- end }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: {{ include "basketball-sub.fullname" . }}
+      port: {{ .Values.service.port }}
+{{- if .Values.gateway.tls.enabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: TLSRoute
+metadata:
+  name: {{ include "basketball-sub.fullname" . }}-tls
+  labels:
+    {{- include "basketball-sub.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gateway.gatewayName }}
+    namespace: {{ .Values.gateway.gatewayNamespace }}
+  hostnames:
+  {{- range .Values.gateway.hostnames }}
+  - {{ . | quote }}
+  {{- end }}
+  rules:
+  - backendRefs:
+    - name: {{ include "basketball-sub.fullname" . }}
+      port: {{ .Values.service.port }}
+{{- end }}
+{{- end }}

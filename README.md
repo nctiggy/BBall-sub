@@ -116,6 +116,250 @@ To preview the production build:
 npm run preview
 ```
 
+## Docker Deployment
+
+### Building the Docker Image
+
+The application includes a multi-stage Dockerfile that builds the React app and serves it with nginx.
+
+```bash
+# Build using Docker directly
+docker build -t basketball-sub:latest .
+
+# Or use the Makefile
+make build-image
+
+# Build with custom tag
+make build-image IMAGE_TAG=v1.0.0
+```
+
+### Running the Container Locally
+
+```bash
+# Run on port 8080
+docker run --rm -p 8080:80 basketball-sub:latest
+
+# Or use the Makefile
+make docker-run
+```
+
+Visit http://localhost:8080 to access the application.
+
+### Pushing to a Registry
+
+```bash
+# Using Docker
+docker tag basketball-sub:latest myregistry.com/basketball-sub:v1.0.0
+docker push myregistry.com/basketball-sub:v1.0.0
+
+# Or use the Makefile
+make push-image REPO_NAME=myregistry.com/basketball-sub IMAGE_TAG=v1.0.0
+```
+
+## Kubernetes Deployment with Helm
+
+### Prerequisites
+
+- Kubernetes cluster (v1.19+)
+- Helm 3.x installed
+- kubectl configured to access your cluster
+
+### Helm Chart Structure
+
+The Helm chart supports multiple service exposure methods:
+- **ClusterIP**: Internal cluster access only (default)
+- **NodePort**: Expose on each node's IP at a static port
+- **LoadBalancer**: Expose using a cloud provider's load balancer
+- **Ingress**: HTTP/HTTPS routing with Ingress controller
+- **Gateway API**: Modern service mesh routing
+
+### Quick Start
+
+```bash
+# Build the Helm chart
+make build-chart
+
+# Install with default values (ClusterIP)
+helm install basketball-sub helm/basketball-sub
+
+# Install with custom values
+helm install basketball-sub helm/basketball-sub \
+  --set image.repository=myregistry.com/basketball-sub \
+  --set image.tag=v1.0.0
+```
+
+### Exposure Methods
+
+#### 1. NodePort
+
+```bash
+helm install basketball-sub helm/basketball-sub \
+  --set service.type=NodePort \
+  --set service.nodePort=30080
+```
+
+Access via: `http://<node-ip>:30080`
+
+#### 2. LoadBalancer
+
+```bash
+helm install basketball-sub helm/basketball-sub \
+  --set service.type=LoadBalancer
+```
+
+Get the LoadBalancer IP:
+```bash
+kubectl get svc basketball-sub
+```
+
+#### 3. Ingress
+
+```bash
+helm install basketball-sub helm/basketball-sub \
+  --set ingress.enabled=true \
+  --set ingress.className=nginx \
+  --set ingress.hosts[0].host=basketball-sub.example.com \
+  --set ingress.hosts[0].paths[0].path=/ \
+  --set ingress.hosts[0].paths[0].pathType=Prefix
+```
+
+With TLS:
+```bash
+helm install basketball-sub helm/basketball-sub \
+  --set ingress.enabled=true \
+  --set ingress.className=nginx \
+  --set ingress.hosts[0].host=basketball-sub.example.com \
+  --set ingress.hosts[0].paths[0].path=/ \
+  --set ingress.hosts[0].paths[0].pathType=Prefix \
+  --set ingress.tls[0].secretName=basketball-sub-tls \
+  --set ingress.tls[0].hosts[0]=basketball-sub.example.com
+```
+
+#### 4. Gateway API (for Service Mesh)
+
+```bash
+helm install basketball-sub helm/basketball-sub \
+  --set gateway.enabled=true \
+  --set gateway.gatewayName=default-gateway \
+  --set gateway.gatewayNamespace=gateway-system \
+  --set gateway.hostnames[0]=basketball-sub.example.com
+```
+
+### Custom Values File
+
+Create a `values-prod.yaml` file:
+
+```yaml
+replicaCount: 3
+
+image:
+  repository: myregistry.com/basketball-sub
+  tag: "v1.0.0"
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: basketball-sub.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: basketball-sub-tls
+      hosts:
+        - basketball-sub.example.com
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+```
+
+Deploy with custom values:
+```bash
+helm install basketball-sub helm/basketball-sub -f values-prod.yaml
+```
+
+### Helm Chart Operations
+
+```bash
+# List installed releases
+helm list
+
+# Upgrade an existing release
+helm upgrade basketball-sub helm/basketball-sub -f values-prod.yaml
+
+# Rollback to previous version
+helm rollback basketball-sub
+
+# Uninstall
+helm uninstall basketball-sub
+
+# View rendered templates
+helm template basketball-sub helm/basketball-sub
+
+# Push chart to OCI registry
+make push-chart HELM_REGISTRY=oci://registry.example.com/charts
+```
+
+## Makefile Commands
+
+The project includes a comprehensive Makefile for building and deploying:
+
+```bash
+# Show all available commands
+make help
+
+# Docker operations
+make build-image                          # Build Docker image
+make push-image REPO_NAME=my/repo        # Push to registry
+make docker-run                           # Run container locally
+
+# Helm operations
+make build-chart                          # Package Helm chart
+make push-chart HELM_REGISTRY=oci://...  # Push chart to registry
+make lint                                 # Lint Helm charts
+
+# Development
+make install-dev                          # Install npm dependencies
+make dev                                  # Start dev server
+make build                                # Build production bundle
+
+# Combined operations
+make all                                  # Build image and chart
+make release                              # Build and push everything
+make clean                                # Clean build artifacts
+```
+
+### Makefile Variables
+
+All Makefile targets support customization via variables:
+
+```bash
+make build-image \
+  IMAGE_NAME=basketball-sub \
+  IMAGE_TAG=v1.0.0 \
+  REGISTRY=ghcr.io \
+  REPO_NAME=ghcr.io/myorg/basketball-sub
+
+make push-chart \
+  CHART_VERSION=1.0.0 \
+  HELM_REGISTRY=oci://ghcr.io/myorg/charts
+```
+
 ## Technologies Used
 
 - **React 18**: UI framework
