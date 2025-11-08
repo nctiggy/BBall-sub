@@ -1,0 +1,19 @@
+{
+  "name": "basketball-substitution-manager",
+  "version": "1.0.0",
+  "description": "A React-based basketball team substitution manager with drag and drop functionality",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.0.0"
+  }
+}

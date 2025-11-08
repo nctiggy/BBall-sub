@@ -1,0 +1,113 @@
+.bench {
+  margin-top: 20px;
+}
+
+.bench h2 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.bench-players {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.bench-players::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bench-players::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.bench-players::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.bench-players::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.empty-bench {
+  text-align: center;
+  padding: 30px 20px;
+  color: #999;
+}
+
+.empty-bench p {
+  margin: 5px 0;
+}
+
+.empty-bench .hint {
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.bench-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  cursor: grab;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.bench-player:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.bench-player:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+.player-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.bench-player .player-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.delete-player {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.delete-player:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
