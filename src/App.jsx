@@ -110,7 +110,8 @@ function App() {
         return { ...p, onCourt: true }
       }
       if (currentPlayerInPosition && p.id === currentPlayerInPosition.id) {
-        return { ...p, onCourt: false }
+        // Track when player was removed from court
+        return { ...p, onCourt: false, lastRemovedTime: Date.now() }
       }
       return p
     }))
@@ -121,7 +122,7 @@ function App() {
     if (player) {
       setCourtPlayers({ ...courtPlayers, [position]: null })
       setPlayers(players.map(p =>
-        p.id === player.id ? { ...p, onCourt: false } : p
+        p.id === player.id ? { ...p, onCourt: false, lastRemovedTime: Date.now() } : p
       ))
     }
   }
@@ -143,6 +144,7 @@ function App() {
   const executeSubstitutions = () => {
     const updatedCourt = { ...courtPlayers }
     const updatedPlayers = [...players]
+    const removalTime = Date.now()
 
     pendingSubstitutions.forEach(sub => {
       // Update court
@@ -153,7 +155,7 @@ function App() {
       const playerInIndex = updatedPlayers.findIndex(p => p.id === sub.playerIn.id)
 
       if (playerOutIndex !== -1) {
-        updatedPlayers[playerOutIndex] = { ...updatedPlayers[playerOutIndex], onCourt: false }
+        updatedPlayers[playerOutIndex] = { ...updatedPlayers[playerOutIndex], onCourt: false, lastRemovedTime: removalTime }
       }
       if (playerInIndex !== -1) {
         updatedPlayers[playerInIndex] = { ...updatedPlayers[playerInIndex], onCourt: true }
@@ -165,7 +167,17 @@ function App() {
     setPendingSubstitutions([])
   }
 
-  const benchPlayers = players.filter(p => !p.onCourt)
+  // Sort bench players so most recently removed are at the bottom
+  const benchPlayers = players
+    .filter(p => !p.onCourt)
+    .sort((a, b) => {
+      // Players never on court (no lastRemovedTime) go first
+      if (!a.lastRemovedTime && !b.lastRemovedTime) return 0
+      if (!a.lastRemovedTime) return -1
+      if (!b.lastRemovedTime) return 1
+      // Otherwise sort by lastRemovedTime (oldest first, newest last)
+      return a.lastRemovedTime - b.lastRemovedTime
+    })
 
   return (
     <div className="app">
