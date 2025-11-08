@@ -101,12 +101,16 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
                     <button
                       className="sub-button"
                       onClick={() => setShowSubMenu(showSubMenu === position ? null : position)}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      onTouchEnd={(e) => e.stopPropagation()}
                     >
                       Sub
                     </button>
                     <button
                       className="remove-button"
                       onClick={() => onRemoveFromCourt(position)}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      onTouchEnd={(e) => e.stopPropagation()}
                     >
                       ×
                     </button>
@@ -119,6 +123,8 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
                           key={benchPlayer.id}
                           className="sub-menu-item"
                           onClick={() => handleSubstitution(position, benchPlayer)}
+                          onTouchStart={(e) => e.stopPropagation()}
+                          onTouchEnd={(e) => e.stopPropagation()}
                         >
                           {benchPlayer.name}
                         </div>

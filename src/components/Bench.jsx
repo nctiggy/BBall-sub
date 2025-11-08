@@ -67,6 +67,8 @@ function Bench({ players, onDeletePlayer }) {
               <button
                 className="delete-player"
                 onClick={() => handleDeleteClick(player)}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
                 title="Delete player"
               >
                 ×
