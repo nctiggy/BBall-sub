@@ -50,6 +50,13 @@ function App() {
 
   const handleDrop = (position, player) => {
     const currentPlayerInPosition = courtPlayers[position]
+    const isPlayerOnBench = !player.onCourt
+
+    // If dragging a bench player over an occupied position, create a substitution instead
+    if (currentPlayerInPosition && isPlayerOnBench) {
+      addSubstitution(currentPlayerInPosition, player, position)
+      return
+    }
 
     // If player is already on court in a different position, remove them from there
     const updatedCourt = { ...courtPlayers }
@@ -63,17 +70,16 @@ function App() {
     updatedCourt[position] = player
     setCourtPlayers(updatedCourt)
 
-    // Update player status
-    setPlayers(players.map(p =>
-      p.id === player.id ? { ...p, onCourt: true } : p
-    ))
-
-    // If there was a player in this position, move them to bench
-    if (currentPlayerInPosition) {
-      setPlayers(players.map(p =>
-        p.id === currentPlayerInPosition.id ? { ...p, onCourt: false } : p
-      ))
-    }
+    // Update player statuses in a single operation
+    setPlayers(players.map(p => {
+      if (p.id === player.id) {
+        return { ...p, onCourt: true }
+      }
+      if (currentPlayerInPosition && p.id === currentPlayerInPosition.id) {
+        return { ...p, onCourt: false }
+      }
+      return p
+    }))
   }
 
   const removeFromCourt = (position) => {
