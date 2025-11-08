@@ -4,6 +4,19 @@ import './AddPlayer.css'
 function AddPlayer({ onAddPlayer }) {
   const [playerName, setPlayerName] = useState('')
 
+  const handleNameChange = (e) => {
+    const input = e.target.value
+    // Capitalize first letter of each word
+    const capitalized = input
+      .split(' ')
+      .map(word => {
+        if (word.length === 0) return word
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      })
+      .join(' ')
+    setPlayerName(capitalized)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (playerName.trim()) {
@@ -19,7 +32,7 @@ function AddPlayer({ onAddPlayer }) {
         <input
           type="text"
           value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
+          onChange={handleNameChange}
           placeholder="Enter player name"
           className="player-input"
         />
