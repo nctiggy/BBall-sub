@@ -29,6 +29,7 @@
   flex-direction: column;
   transition: all 0.3s;
   position: relative;
+  touch-action: none;
 }
 
 .court-position.drag-over {

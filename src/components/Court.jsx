@@ -33,6 +33,30 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
     setDragOverPosition(null)
   }
 
+  const handleTouchMove = (e, position) => {
+    // Provide visual feedback when dragging over a position
+    if (window.isDragging) {
+      e.preventDefault()
+      setDragOverPosition(position)
+    }
+  }
+
+  const handleTouchEnd = (e, position) => {
+    e.preventDefault()
+
+    // Check if we have a dragged player from touch event
+    if (window.draggedPlayer && window.isDragging) {
+      const player = window.draggedPlayer
+      onDrop(position, player)
+
+      // Clean up
+      window.draggedPlayer = null
+      window.isDragging = false
+    }
+
+    setDragOverPosition(null)
+  }
+
   const handleSubstitution = (position, playerIn) => {
     const playerOut = courtPlayers[position]
     if (playerOut) {
@@ -56,6 +80,8 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
               onDragOver={(e) => handleDragOver(e, position)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, position)}
+              onTouchMove={(e) => handleTouchMove(e, position)}
+              onTouchEnd={(e) => handleTouchEnd(e, position)}
             >
               <div className="position-label">
                 <span className="position-number">{POSITION_NUMBERS[position]}</span> {position}
