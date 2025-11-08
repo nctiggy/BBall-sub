@@ -78,6 +78,16 @@ function App() {
 
   const addPlayer = (playerName) => {
     if (playerName.trim()) {
+      // Check for duplicate names (case-insensitive)
+      const nameExists = players.some(
+        p => p.name.toLowerCase() === playerName.trim().toLowerCase()
+      )
+
+      if (nameExists) {
+        alert(`A player named "${playerName}" already exists on the team!`)
+        return
+      }
+
       const newPlayer = {
         id: Date.now(),
         name: playerName,
