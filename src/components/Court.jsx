@@ -1,6 +1,15 @@
 import { useState } from 'react'
 import './Court.css'
 
+// Map positions to their numbers
+const POSITION_NUMBERS = {
+  'Point Guard': 1,
+  'Shooting Guard': 2,
+  'Small Forward': 3,
+  'Power Forward': 4,
+  'Center': 5
+}
+
 function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubstitution, benchPlayers }) {
   const [dragOverPosition, setDragOverPosition] = useState(null)
   const [showSubMenu, setShowSubMenu] = useState(null)
@@ -48,7 +57,9 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, position)}
             >
-              <div className="position-label">{position}</div>
+              <div className="position-label">
+                <span className="position-number">{POSITION_NUMBERS[position]}</span> {position}
+              </div>
               {player ? (
                 <div className="player-on-court">
                   <div className="player-info">
