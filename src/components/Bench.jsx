@@ -5,6 +5,12 @@ function Bench({ players, onDeletePlayer }) {
     e.dataTransfer.setData('player', JSON.stringify(player))
   }
 
+  const handleDeleteClick = (player) => {
+    if (window.confirm(`Are you sure you want to delete ${player.name} from the team?`)) {
+      onDeletePlayer(player.id)
+    }
+  }
+
   return (
     <div className="bench">
       <h2>Bench ({players.length})</h2>
@@ -28,7 +34,7 @@ function Bench({ players, onDeletePlayer }) {
               <span className="player-name">{player.name}</span>
               <button
                 className="delete-player"
-                onClick={() => onDeletePlayer(player.id)}
+                onClick={() => handleDeleteClick(player)}
                 title="Delete player"
               >
                 ×
