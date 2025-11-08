@@ -42,16 +42,22 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
   }
 
   const handleTouchEnd = (e, position) => {
-    e.preventDefault()
+    // Don't prevent default if touching a button - let the click handler work
+    const target = e.target
+    const isButton = target.tagName === 'BUTTON' || target.closest('button')
 
-    // Check if we have a dragged player from touch event
-    if (window.draggedPlayer && window.isDragging) {
-      const player = window.draggedPlayer
-      onDrop(position, player)
+    if (!isButton) {
+      e.preventDefault()
 
-      // Clean up
-      window.draggedPlayer = null
-      window.isDragging = false
+      // Check if we have a dragged player from touch event
+      if (window.draggedPlayer && window.isDragging) {
+        const player = window.draggedPlayer
+        onDrop(position, player)
+
+        // Clean up
+        window.draggedPlayer = null
+        window.isDragging = false
+      }
     }
 
     setDragOverPosition(null)

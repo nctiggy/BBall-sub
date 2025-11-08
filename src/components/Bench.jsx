@@ -8,9 +8,15 @@ function Bench({ players, onDeletePlayer }) {
   }
 
   const handleTouchStart = (e, player) => {
-    // Store player data for touch events
+    // Don't start drag if touching a button
+    if (e.target.classList.contains('delete-player')) {
+      return
+    }
+
+    // Start drag immediately for better responsiveness
     window.draggedPlayer = player
     window.isDragging = true
+    window.touchStartTime = Date.now()
 
     // Get the touch target element
     const target = e.currentTarget
@@ -20,7 +26,13 @@ function Bench({ players, onDeletePlayer }) {
   const handleTouchEnd = (e) => {
     const target = e.currentTarget
     target.classList.remove('dragging')
-    window.isDragging = false
+
+    // Only clear if not a quick tap
+    const touchDuration = Date.now() - (window.touchStartTime || 0)
+    if (touchDuration > 100) {
+      window.isDragging = false
+      window.draggedPlayer = null
+    }
   }
 
   const handleDeleteClick = (player) => {

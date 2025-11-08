@@ -115,6 +115,7 @@
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s;
+  touch-action: auto;
 }
 
 .sub-button {
@@ -167,6 +168,7 @@
   cursor: pointer;
   border-bottom: 1px solid #eee;
   transition: background 0.2s;
+  touch-action: auto;
 }
 
 .sub-menu-item:hover {
