@@ -4,6 +4,7 @@ import Court from './components/Court'
 import Bench from './components/Bench'
 import SubstitutionManager from './components/SubstitutionManager'
 import './App.css'
+import packageJson from '../package.json'
 
 const POSITIONS = ['Point Guard', 'Shooting Guard', 'Small Forward', 'Power Forward', 'Center']
 const STORAGE_KEY = 'basketball-sub-data'
@@ -213,6 +214,10 @@ function App() {
           />
         </div>
       </div>
+
+      <footer className="app-footer">
+        <p>Version {packageJson.version}</p>
+      </footer>
     </div>
   )
 }
