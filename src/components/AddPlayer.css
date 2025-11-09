@@ -47,3 +47,21 @@
 .add-button:active {
   transform: translateY(0);
 }
+
+/* Tablet optimizations */
+@media (max-width: 1024px) {
+  .add-player h2 {
+    font-size: 1.7rem;
+    margin-bottom: 20px;
+  }
+
+  .player-input {
+    padding: 16px;
+    font-size: 1.1rem;
+  }
+
+  .add-button {
+    padding: 16px;
+    font-size: 1.1rem;
+  }
+}

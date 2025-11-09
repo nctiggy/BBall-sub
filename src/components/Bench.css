@@ -121,3 +121,32 @@
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
 }
+
+/* Tablet optimizations */
+@media (max-width: 1024px) {
+  .bench h2 {
+    font-size: 1.7rem;
+    margin-bottom: 20px;
+  }
+
+  .bench-player {
+    padding: 16px;
+    gap: 15px;
+  }
+
+  .player-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.4rem;
+  }
+
+  .bench-player .player-name {
+    font-size: 1.2rem;
+  }
+
+  .delete-player {
+    width: 36px;
+    height: 36px;
+    font-size: 1.5rem;
+  }
+}

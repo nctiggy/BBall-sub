@@ -178,3 +178,43 @@
 .sub-menu-item:last-child {
   border-bottom: none;
 }
+
+/* Tablet optimizations */
+@media (max-width: 1024px) {
+  .court {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 25px;
+  }
+
+  .court-position {
+    min-height: 180px;
+    padding: 20px;
+  }
+
+  .position-label {
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+
+  .position-number {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+
+  .player-name {
+    font-size: 1.3rem;
+  }
+
+  .sub-button,
+  .remove-button {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .remove-button {
+    max-width: 50px;
+    font-size: 1.4rem;
+  }
+}

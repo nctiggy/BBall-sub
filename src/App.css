@@ -49,6 +49,47 @@
   }
 }
 
+/* Tablet optimizations (iPad portrait: 768px - 1024px) */
+@media (max-width: 1024px) {
+  .app-header {
+    padding: 25px;
+    margin-bottom: 25px;
+  }
+
+  .app-header h1 {
+    font-size: 2.2rem;
+  }
+
+  .left-panel,
+  .center-panel,
+  .right-panel {
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+
+  /* Reorder for better flow on tablets */
+  .app-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Court first for easy access */
+  .center-panel {
+    order: 1;
+    min-height: auto;
+  }
+
+  /* Add player and bench second */
+  .left-panel {
+    order: 2;
+  }
+
+  /* Substitutions last */
+  .right-panel {
+    order: 3;
+  }
+}
+
 .app-footer {
   margin-top: 30px;
   padding: 15px;
