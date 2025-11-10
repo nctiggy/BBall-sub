@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import AddPlayer from './components/AddPlayer'
 import Court from './components/Court'
 import Bench from './components/Bench'
 import SubstitutionManager from './components/SubstitutionManager'
+import PlayerModal from './components/PlayerModal'
 import './App.css'
 import packageJson from '../package.json'
 
@@ -43,6 +43,7 @@ function App() {
     'Center': null
   })
   const [pendingSubstitutions, setPendingSubstitutions] = useState(savedData?.pendingSubstitutions || [])
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -216,12 +217,20 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
+        <button className="menu-button" onClick={() => setIsModalOpen(true)}>
+          ☰
+        </button>
         <h1>🏀 Basketball Substitution Manager</h1>
       </header>
 
+      <PlayerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddPlayer={addPlayer}
+      />
+
       <div className="app-content">
         <div className="left-panel">
-          <AddPlayer onAddPlayer={addPlayer} />
           <Bench
             players={benchPlayers}
             onDeletePlayer={deletePlayer}
