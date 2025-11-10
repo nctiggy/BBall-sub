@@ -3,6 +3,7 @@ import Court from './components/Court'
 import Bench from './components/Bench'
 import SubstitutionManager from './components/SubstitutionManager'
 import PlayerModal from './components/PlayerModal'
+import GameControlModal from './components/GameControlModal'
 import Menu from './components/Menu'
 import './App.css'
 import packageJson from '../package.json'
@@ -45,15 +46,18 @@ function App() {
   })
   const [pendingSubstitutions, setPendingSubstitutions] = useState(savedData?.pendingSubstitutions || [])
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [gameActive, setGameActive] = useState(savedData?.gameActive || false)
+  const [isGameControlModalOpen, setIsGameControlModalOpen] = useState(false)
 
   // Save to localStorage whenever state changes
   useEffect(() => {
     saveToStorage({
       players,
       courtPlayers,
-      pendingSubstitutions
+      pendingSubstitutions,
+      gameActive
     })
-  }, [players, courtPlayers, pendingSubstitutions])
+  }, [players, courtPlayers, pendingSubstitutions, gameActive])
 
   // Reconcile player onCourt status with courtPlayers to ensure consistency
   useEffect(() => {
@@ -93,7 +97,9 @@ function App() {
       const newPlayer = {
         id: Date.now(),
         name: playerName,
-        onCourt: false
+        onCourt: false,
+        totalTimeOnCourt: 0,
+        timeOnCourtStart: null
       }
       setPlayers([...players, newPlayer])
     }
@@ -141,13 +147,27 @@ function App() {
     setCourtPlayers(updatedCourt)
 
     // Update player statuses in a single operation
+    const now = Date.now()
     setPlayers(players.map(p => {
       if (p.id === player.id) {
-        return { ...p, onCourt: true }
+        return {
+          ...p,
+          onCourt: true,
+          timeOnCourtStart: gameActive ? now : null
+        }
       }
       if (currentPlayerInPosition && p.id === currentPlayerInPosition.id) {
-        // Track when player was removed from court
-        return { ...p, onCourt: false, lastRemovedTime: Date.now() }
+        // Track when player was removed from court and accumulate time
+        const timeToAdd = (gameActive && p.timeOnCourtStart)
+          ? now - p.timeOnCourtStart
+          : 0
+        return {
+          ...p,
+          onCourt: false,
+          lastRemovedTime: now,
+          totalTimeOnCourt: (p.totalTimeOnCourt || 0) + timeToAdd,
+          timeOnCourtStart: null
+        }
       }
       return p
     }))
@@ -156,10 +176,23 @@ function App() {
   const removeFromCourt = (position) => {
     const player = courtPlayers[position]
     if (player) {
+      const now = Date.now()
       setCourtPlayers({ ...courtPlayers, [position]: null })
-      setPlayers(players.map(p =>
-        p.id === player.id ? { ...p, onCourt: false, lastRemovedTime: Date.now() } : p
-      ))
+      setPlayers(players.map(p => {
+        if (p.id === player.id) {
+          const timeToAdd = (gameActive && p.timeOnCourtStart)
+            ? now - p.timeOnCourtStart
+            : 0
+          return {
+            ...p,
+            onCourt: false,
+            lastRemovedTime: now,
+            totalTimeOnCourt: (p.totalTimeOnCourt || 0) + timeToAdd,
+            timeOnCourtStart: null
+          }
+        }
+        return p
+      }))
     }
   }
 
@@ -180,7 +213,7 @@ function App() {
   const executeSubstitutions = () => {
     const updatedCourt = { ...courtPlayers }
     const updatedPlayers = [...players]
-    const removalTime = Date.now()
+    const now = Date.now()
 
     pendingSubstitutions.forEach(sub => {
       // Update court
@@ -191,10 +224,24 @@ function App() {
       const playerInIndex = updatedPlayers.findIndex(p => p.id === sub.playerIn.id)
 
       if (playerOutIndex !== -1) {
-        updatedPlayers[playerOutIndex] = { ...updatedPlayers[playerOutIndex], onCourt: false, lastRemovedTime: removalTime }
+        const playerOut = updatedPlayers[playerOutIndex]
+        const timeToAdd = (gameActive && playerOut.timeOnCourtStart)
+          ? now - playerOut.timeOnCourtStart
+          : 0
+        updatedPlayers[playerOutIndex] = {
+          ...playerOut,
+          onCourt: false,
+          lastRemovedTime: now,
+          totalTimeOnCourt: (playerOut.totalTimeOnCourt || 0) + timeToAdd,
+          timeOnCourtStart: null
+        }
       }
       if (playerInIndex !== -1) {
-        updatedPlayers[playerInIndex] = { ...updatedPlayers[playerInIndex], onCourt: true }
+        updatedPlayers[playerInIndex] = {
+          ...updatedPlayers[playerInIndex],
+          onCourt: true,
+          timeOnCourtStart: gameActive ? now : null
+        }
       }
     })
 
@@ -203,22 +250,64 @@ function App() {
     setPendingSubstitutions([])
   }
 
-  // Sort bench players so most recently removed are at the bottom
+  // Sort bench players by least to most playing time
   const benchPlayers = players
     .filter(p => !p.onCourt)
     .sort((a, b) => {
-      // Players never on court (no lastRemovedTime) go first
-      if (!a.lastRemovedTime && !b.lastRemovedTime) return 0
-      if (!a.lastRemovedTime) return -1
-      if (!b.lastRemovedTime) return 1
-      // Otherwise sort by lastRemovedTime (oldest first, newest last)
-      return a.lastRemovedTime - b.lastRemovedTime
+      const aTime = a.totalTimeOnCourt || 0
+      const bTime = b.totalTimeOnCourt || 0
+      return aTime - bTime
     })
+
+  const startGame = () => {
+    const now = Date.now()
+    setGameActive(true)
+    // Start time tracking for all players currently on court
+    setPlayers(players.map(p => {
+      if (p.onCourt && !p.timeOnCourtStart) {
+        return { ...p, timeOnCourtStart: now }
+      }
+      return p
+    }))
+    setIsGameControlModalOpen(false)
+  }
+
+  const stopGame = () => {
+    const now = Date.now()
+    setGameActive(false)
+    // Stop time tracking and accumulate time for all players on court
+    setPlayers(players.map(p => {
+      if (p.onCourt && p.timeOnCourtStart) {
+        const timeToAdd = now - p.timeOnCourtStart
+        return {
+          ...p,
+          totalTimeOnCourt: (p.totalTimeOnCourt || 0) + timeToAdd,
+          timeOnCourtStart: null
+        }
+      }
+      return p
+    }))
+    setIsGameControlModalOpen(false)
+  }
+
+  const resetGameStats = () => {
+    if (window.confirm('Are you sure you want to reset all player time statistics? This cannot be undone.')) {
+      setPlayers(players.map(p => ({
+        ...p,
+        totalTimeOnCourt: 0,
+        timeOnCourtStart: p.onCourt && gameActive ? Date.now() : null
+      })))
+      setIsGameControlModalOpen(false)
+    }
+  }
 
   return (
     <div className="app">
       <header className="app-header">
-        <Menu onAddPlayer={() => setIsModalOpen(true)} />
+        <Menu
+          onAddPlayer={() => setIsModalOpen(true)}
+          onGameControl={() => setIsGameControlModalOpen(true)}
+        />
         <h1>🏀 Basketball Substitution Manager</h1>
       </header>
 
@@ -226,6 +315,15 @@ function App() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAddPlayer={addPlayer}
+      />
+
+      <GameControlModal
+        isOpen={isGameControlModalOpen}
+        onClose={() => setIsGameControlModalOpen(false)}
+        gameActive={gameActive}
+        onStartGame={startGame}
+        onStopGame={stopGame}
+        onResetStats={resetGameStats}
       />
 
       <div className="app-content">
@@ -244,6 +342,8 @@ function App() {
             onRemoveFromCourt={removeFromCourt}
             onAddSubstitution={addSubstitution}
             benchPlayers={benchPlayers}
+            gameActive={gameActive}
+            players={players}
           />
         </div>
 

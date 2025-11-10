@@ -95,9 +95,23 @@
   flex-shrink: 0;
 }
 
-.bench-player .player-name {
+.player-details {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bench-player .player-name {
   font-weight: 600;
+  font-size: 1rem;
+}
+
+.player-total-time {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
 }
 
 .delete-player {
@@ -142,6 +156,10 @@
 
   .bench-player .player-name {
     font-size: 1.2rem;
+  }
+
+  .player-total-time {
+    font-size: 1rem;
   }
 
   .delete-player {

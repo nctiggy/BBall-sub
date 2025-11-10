@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import './Menu.css'
 
-function Menu({ onAddPlayer }) {
+function Menu({ onAddPlayer, onGameControl }) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -47,6 +47,14 @@ function Menu({ onAddPlayer }) {
           >
             <span className="menu-icon">➕</span>
             <span className="menu-text">Add Player</span>
+          </button>
+
+          <button
+            className="menu-item"
+            onClick={() => handleMenuItemClick(onGameControl)}
+          >
+            <span className="menu-icon">⏱️</span>
+            <span className="menu-text">Game Control</span>
           </button>
 
           {/* Future menu items can be added here */}

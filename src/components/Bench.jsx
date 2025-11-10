@@ -1,5 +1,13 @@
 import './Bench.css'
 
+// Format time in MM:SS
+const formatTime = (milliseconds) => {
+  const totalSeconds = Math.floor(milliseconds / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
 function Bench({ players, onDeletePlayer }) {
   const handleDragStart = (e, player) => {
     e.dataTransfer.setData('player', JSON.stringify(player))
@@ -63,7 +71,12 @@ function Bench({ players, onDeletePlayer }) {
               <div className="player-avatar">
                 {player.name.charAt(0).toUpperCase()}
               </div>
-              <span className="player-name">{player.name}</span>
+              <div className="player-details">
+                <span className="player-name">{player.name}</span>
+                <span className="player-total-time">
+                  Total: {formatTime(player.totalTimeOnCourt || 0)}
+                </span>
+              </div>
               <button
                 className="delete-player"
                 onClick={() => handleDeleteClick(player)}

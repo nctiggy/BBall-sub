@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Court.css'
 
 // Map positions to their numbers
@@ -10,9 +10,28 @@ const POSITION_NUMBERS = {
   'Center': 5
 }
 
-function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubstitution, benchPlayers }) {
+// Format time in MM:SS
+const formatTime = (milliseconds) => {
+  const totalSeconds = Math.floor(milliseconds / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubstitution, benchPlayers, gameActive, players }) {
   const [dragOverPosition, setDragOverPosition] = useState(null)
   const [showSubMenu, setShowSubMenu] = useState(null)
+  const [currentTime, setCurrentTime] = useState(Date.now())
+
+  // Update current time every second when game is active
+  useEffect(() => {
+    if (gameActive) {
+      const interval = setInterval(() => {
+        setCurrentTime(Date.now())
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [gameActive])
 
   const handleDragOver = (e, position) => {
     e.preventDefault()
@@ -79,6 +98,15 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
           const player = courtPlayers[position]
           const isHovered = dragOverPosition === position
 
+          // Get full player data including time tracking
+          const fullPlayer = player ? players.find(p => p.id === player.id) : null
+
+          // Calculate current stint time
+          let currentStintTime = 0
+          if (fullPlayer && fullPlayer.timeOnCourtStart && gameActive) {
+            currentStintTime = currentTime - fullPlayer.timeOnCourtStart
+          }
+
           return (
             <div
               key={position}
@@ -96,6 +124,9 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
                 <div className="player-on-court">
                   <div className="player-info">
                     <span className="player-name">{player.name}</span>
+                    {gameActive && fullPlayer && fullPlayer.timeOnCourtStart && (
+                      <span className="player-time">{formatTime(currentStintTime)}</span>
+                    )}
                   </div>
                   <div className="player-actions">
                     <button
