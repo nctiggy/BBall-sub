@@ -99,6 +99,7 @@ function App() {
         name: playerName,
         onCourt: false,
         totalTimeOnCourt: 0,
+        currentStintTime: 0,
         timeOnCourtStart: null
       }
       setPlayers([...players, newPlayer])
@@ -153,19 +154,21 @@ function App() {
         return {
           ...p,
           onCourt: true,
+          currentStintTime: 0,
           timeOnCourtStart: gameActive ? now : null
         }
       }
       if (currentPlayerInPosition && p.id === currentPlayerInPosition.id) {
         // Track when player was removed from court and accumulate time
-        const timeToAdd = (gameActive && p.timeOnCourtStart)
-          ? now - p.timeOnCourtStart
-          : 0
+        const stintTimeToAdd = (gameActive && p.timeOnCourtStart)
+          ? (p.currentStintTime || 0) + (now - p.timeOnCourtStart)
+          : (p.currentStintTime || 0)
         return {
           ...p,
           onCourt: false,
           lastRemovedTime: now,
-          totalTimeOnCourt: (p.totalTimeOnCourt || 0) + timeToAdd,
+          totalTimeOnCourt: (p.totalTimeOnCourt || 0) + stintTimeToAdd,
+          currentStintTime: 0,
           timeOnCourtStart: null
         }
       }
@@ -180,14 +183,15 @@ function App() {
       setCourtPlayers({ ...courtPlayers, [position]: null })
       setPlayers(players.map(p => {
         if (p.id === player.id) {
-          const timeToAdd = (gameActive && p.timeOnCourtStart)
-            ? now - p.timeOnCourtStart
-            : 0
+          const stintTimeToAdd = (gameActive && p.timeOnCourtStart)
+            ? (p.currentStintTime || 0) + (now - p.timeOnCourtStart)
+            : (p.currentStintTime || 0)
           return {
             ...p,
             onCourt: false,
             lastRemovedTime: now,
-            totalTimeOnCourt: (p.totalTimeOnCourt || 0) + timeToAdd,
+            totalTimeOnCourt: (p.totalTimeOnCourt || 0) + stintTimeToAdd,
+            currentStintTime: 0,
             timeOnCourtStart: null
           }
         }
@@ -225,14 +229,15 @@ function App() {
 
       if (playerOutIndex !== -1) {
         const playerOut = updatedPlayers[playerOutIndex]
-        const timeToAdd = (gameActive && playerOut.timeOnCourtStart)
-          ? now - playerOut.timeOnCourtStart
-          : 0
+        const stintTimeToAdd = (gameActive && playerOut.timeOnCourtStart)
+          ? (playerOut.currentStintTime || 0) + (now - playerOut.timeOnCourtStart)
+          : (playerOut.currentStintTime || 0)
         updatedPlayers[playerOutIndex] = {
           ...playerOut,
           onCourt: false,
           lastRemovedTime: now,
-          totalTimeOnCourt: (playerOut.totalTimeOnCourt || 0) + timeToAdd,
+          totalTimeOnCourt: (playerOut.totalTimeOnCourt || 0) + stintTimeToAdd,
+          currentStintTime: 0,
           timeOnCourtStart: null
         }
       }
@@ -240,6 +245,7 @@ function App() {
         updatedPlayers[playerInIndex] = {
           ...updatedPlayers[playerInIndex],
           onCourt: true,
+          currentStintTime: 0,
           timeOnCourtStart: gameActive ? now : null
         }
       }
@@ -275,13 +281,13 @@ function App() {
   const stopGame = () => {
     const now = Date.now()
     setGameActive(false)
-    // Stop time tracking and accumulate time for all players on court
+    // Stop time tracking and accumulate time into current stint for all players on court
     setPlayers(players.map(p => {
       if (p.onCourt && p.timeOnCourtStart) {
         const timeToAdd = now - p.timeOnCourtStart
         return {
           ...p,
-          totalTimeOnCourt: (p.totalTimeOnCourt || 0) + timeToAdd,
+          currentStintTime: (p.currentStintTime || 0) + timeToAdd,
           timeOnCourtStart: null
         }
       }
@@ -295,6 +301,7 @@ function App() {
       setPlayers(players.map(p => ({
         ...p,
         totalTimeOnCourt: 0,
+        currentStintTime: 0,
         timeOnCourtStart: p.onCourt && gameActive ? Date.now() : null
       })))
       setIsGameControlModalOpen(false)

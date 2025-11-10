@@ -103,8 +103,13 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
 
           // Calculate current stint time
           let currentStintTime = 0
-          if (fullPlayer && fullPlayer.timeOnCourtStart && gameActive) {
-            currentStintTime = currentTime - fullPlayer.timeOnCourtStart
+          if (fullPlayer) {
+            // Add accumulated stint time
+            currentStintTime = fullPlayer.currentStintTime || 0
+            // If game is active and player has started tracking, add elapsed time
+            if (gameActive && fullPlayer.timeOnCourtStart) {
+              currentStintTime += (currentTime - fullPlayer.timeOnCourtStart)
+            }
           }
 
           return (
@@ -124,7 +129,7 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
                 <div className="player-on-court">
                   <div className="player-info">
                     <span className="player-name">{player.name}</span>
-                    {gameActive && fullPlayer && fullPlayer.timeOnCourtStart && (
+                    {fullPlayer && currentStintTime > 0 && (
                       <span className="player-time">{formatTime(currentStintTime)}</span>
                     )}
                   </div>
