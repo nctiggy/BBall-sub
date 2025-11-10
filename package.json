@@ -1,6 +1,6 @@
 {
   "name": "basketball-substitution-manager",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A React-based basketball team substitution manager with drag and drop functionality",
   "private": true,
   "scripts": {

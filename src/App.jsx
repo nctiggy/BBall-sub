@@ -3,6 +3,7 @@ import Court from './components/Court'
 import Bench from './components/Bench'
 import SubstitutionManager from './components/SubstitutionManager'
 import PlayerModal from './components/PlayerModal'
+import Menu from './components/Menu'
 import './App.css'
 import packageJson from '../package.json'
 
@@ -217,9 +218,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <button className="menu-button" onClick={() => setIsModalOpen(true)}>
-          ☰
-        </button>
+        <Menu onAddPlayer={() => setIsModalOpen(true)} />
         <h1>🏀 Basketball Substitution Manager</h1>
       </header>
 

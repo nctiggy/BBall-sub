@@ -21,31 +21,9 @@
   margin: 0;
 }
 
-.menu-button {
+.menu-container {
   position: absolute;
   left: 20px;
-  width: 50px;
-  height: 50px;
-  border: none;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 12px;
-  font-size: 2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.menu-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-.menu-button:active {
-  transform: translateY(0);
 }
 
 .app-content {
