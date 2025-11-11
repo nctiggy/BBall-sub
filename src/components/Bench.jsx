@@ -21,26 +21,38 @@ function Bench({ players, onDeletePlayer }) {
       return
     }
 
-    // Start drag immediately for better responsiveness
+    // Store player but don't mark as dragging yet (allow scrolling)
     window.draggedPlayer = player
-    window.isDragging = true
+    window.isDragging = false
     window.touchStartTime = Date.now()
 
-    // Get the touch target element
-    const target = e.currentTarget
-    target.classList.add('dragging')
+    // Store initial touch position to detect drag vs scroll
+    const touch = e.touches[0]
+    window.touchStartX = touch.clientX
+    window.touchStartY = touch.clientY
+  }
+
+  const handleTouchMove = (e, player) => {
+    if (!window.draggedPlayer) return
+
+    const touch = e.touches[0]
+    const deltaX = Math.abs(touch.clientX - window.touchStartX)
+    const deltaY = Math.abs(touch.clientY - window.touchStartY)
+
+    // If moving more horizontally than vertically, start dragging
+    if (deltaX > 10 && deltaX > deltaY && !window.isDragging) {
+      window.isDragging = true
+      e.currentTarget.classList.add('dragging')
+    }
   }
 
   const handleTouchEnd = (e) => {
     const target = e.currentTarget
     target.classList.remove('dragging')
 
-    // Only clear if not a quick tap
-    const touchDuration = Date.now() - (window.touchStartTime || 0)
-    if (touchDuration > 100) {
-      window.isDragging = false
-      window.draggedPlayer = null
-    }
+    // Clear dragging state
+    window.isDragging = false
+    window.draggedPlayer = null
   }
 
   const handleDeleteClick = (player) => {
@@ -66,6 +78,7 @@ function Bench({ players, onDeletePlayer }) {
               draggable
               onDragStart={(e) => handleDragStart(e, player)}
               onTouchStart={(e) => handleTouchStart(e, player)}
+              onTouchMove={(e) => handleTouchMove(e, player)}
               onTouchEnd={handleTouchEnd}
             >
               <div className="player-avatar">
