@@ -308,6 +308,14 @@ function App() {
     }
   }
 
+  const toggleGame = () => {
+    if (gameActive) {
+      stopGame()
+    } else {
+      startGame()
+    }
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -316,6 +324,13 @@ function App() {
           onGameControl={() => setIsGameControlModalOpen(true)}
         />
         <h1>🏀 Basketball Substitution Manager</h1>
+        <button
+          className={`game-toggle-button ${gameActive ? 'active' : 'paused'}`}
+          onClick={toggleGame}
+          title={gameActive ? 'Pause Game Clock' : 'Start Game Clock'}
+        >
+          {gameActive ? '⏸' : '▶'}
+        </button>
       </header>
 
       <PlayerModal

@@ -26,6 +26,46 @@
   left: 20px;
 }
 
+.game-toggle-button {
+  position: absolute;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.game-toggle-button.active {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+}
+
+.game-toggle-button.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.game-toggle-button.paused {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.game-toggle-button.paused:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.game-toggle-button:active {
+  transform: translateY(0);
+}
+
 .app-content {
   display: grid;
   grid-template-columns: 300px 1fr 350px;
@@ -74,6 +114,13 @@
     height: 60px;
     font-size: 2.5rem;
     left: 15px;
+  }
+
+  .game-toggle-button {
+    width: 70px;
+    height: 70px;
+    font-size: 2.2rem;
+    right: 15px;
   }
 
   .left-panel,
