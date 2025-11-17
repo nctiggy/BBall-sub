@@ -118,12 +118,12 @@
 }
 
 .left-panel {
-  max-height: 800px;
+  max-height: 650px;
   overflow: hidden;
 }
 
 .center-panel {
-  min-height: 600px;
+  max-height: 650px;
 }
 
 @media (max-width: 1200px) {
@@ -219,13 +219,14 @@
     grid-column: 1;
     grid-row: 1;
     order: initial;
-    max-height: 700px;
+    max-height: 600px;
   }
 
   .center-panel {
     grid-column: 2;
     grid-row: 1;
     order: initial;
+    max-height: 600px;
   }
 
   .right-panel {

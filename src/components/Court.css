@@ -1,5 +1,9 @@
 .court-container {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .court-container h2 {
@@ -7,6 +11,7 @@
   font-size: 1.8rem;
   margin-bottom: 20px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .court {
