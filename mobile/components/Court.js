@@ -21,6 +21,7 @@ const formatTime = (milliseconds) => {
 
 function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubstitution, benchPlayers, gameActive, players }) {
   const [showSubMenu, setShowSubMenu] = useState(null);
+  const [showAddMenu, setShowAddMenu] = useState(null);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
   // Update current time every second when game is active
@@ -40,6 +41,12 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
       setShowSubMenu(null);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
+  };
+
+  const handleAddPlayer = (position, player) => {
+    onDrop(position, player);
+    setShowAddMenu(null);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   const handleRemove = (position) => {
@@ -126,9 +133,35 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
                   )}
                 </View>
               ) : (
-                <View style={styles.emptyPosition}>
-                  <Text style={styles.emptyPositionText}>Drag player here</Text>
-                </View>
+                <>
+                  <TouchableOpacity
+                    style={styles.emptyPosition}
+                    onPress={() => setShowAddMenu(showAddMenu === position ? null : position)}
+                  >
+                    <Text style={styles.emptyPositionText}>
+                      {benchPlayers.length > 0 ? 'Tap to add player' : 'No players available'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {showAddMenu === position && benchPlayers.length > 0 && (
+                    <View style={styles.addMenu}>
+                      <View style={styles.addMenuHeader}>
+                        <Text style={styles.addMenuHeaderText}>Select player:</Text>
+                      </View>
+                      <ScrollView style={styles.addMenuScroll} nestedScrollEnabled={true}>
+                        {benchPlayers.map((benchPlayer) => (
+                          <TouchableOpacity
+                            key={benchPlayer.id}
+                            style={styles.addMenuItem}
+                            onPress={() => handleAddPlayer(position, benchPlayer)}
+                          >
+                            <Text style={styles.addMenuItemText}>{benchPlayer.name}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
+                </>
               )}
             </View>
           );
@@ -294,6 +327,36 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
   },
   subMenuItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  addMenu: {
+    marginTop: 10,
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: '#4caf50',
+    borderRadius: 8,
+    maxHeight: 200,
+    overflow: 'hidden',
+  },
+  addMenuHeader: {
+    backgroundColor: '#4caf50',
+    padding: 10,
+  },
+  addMenuHeaderText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  addMenuScroll: {
+    maxHeight: 150,
+  },
+  addMenuItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  addMenuItemText: {
     fontSize: 16,
     color: '#333',
   },
