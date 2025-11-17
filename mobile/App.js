@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Court from './components/Court';
@@ -8,6 +8,7 @@ import SubstitutionManager from './components/SubstitutionManager';
 import PlayerModal from './components/PlayerModal';
 import GameControlModal from './components/GameControlModal';
 import Menu from './components/Menu';
+import * as Haptics from 'expo-haptics';
 
 const POSITIONS = ['Point Guard', 'Shooting Guard', 'Small Forward', 'Power Forward', 'Center'];
 const STORAGE_KEY = 'basketball-sub-data';
@@ -35,6 +36,10 @@ const saveToStorage = async (data) => {
 };
 
 function App() {
+  // Get screen dimensions for responsive layout
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+
   // Load initial state from AsyncStorage
   const [players, setPlayers] = useState([]);
   const [courtPlayers, setCourtPlayers] = useState({
@@ -49,6 +54,7 @@ function App() {
   const [gameActive, setGameActive] = useState(false);
   const [isGameControlModalOpen, setIsGameControlModalOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState('court'); // 'bench', 'court', 'subs'
 
   // Load data on mount
   useEffect(() => {
@@ -354,7 +360,9 @@ function App() {
             onAddPlayer={() => setIsModalOpen(true)}
             onGameControl={() => setIsGameControlModalOpen(true)}
           />
-          <Text style={styles.headerTitle}>🏀 Basketball Substitution Manager</Text>
+          <Text style={styles.headerTitle}>
+            {isTablet ? '🏀 Basketball Substitution Manager' : '🏀 Sub Manager'}
+          </Text>
           <View style={styles.headerActions}>
             {pendingSubstitutions.length > 0 && (
               <TouchableOpacity
@@ -388,41 +396,129 @@ function App() {
           onResetStats={resetGameStats}
         />
 
-        {/* Main Content */}
-        <View style={styles.appContent}>
-          <View style={styles.leftPanel}>
-            <Bench
-              players={benchPlayers}
-              onDeletePlayer={deletePlayer}
-            />
-          </View>
+        {/* Main Content - Responsive Layout */}
+        {isTablet ? (
+          // iPad: Side-by-side three-panel layout
+          <View style={styles.appContent}>
+            <View style={styles.leftPanel}>
+              <Bench
+                players={benchPlayers}
+                onDeletePlayer={deletePlayer}
+              />
+            </View>
 
-          <View style={styles.centerPanel}>
-            <Court
-              courtPlayers={courtPlayers}
-              positions={POSITIONS}
-              onDrop={handleDrop}
-              onRemoveFromCourt={removeFromCourt}
-              onAddSubstitution={addSubstitution}
-              benchPlayers={benchPlayers}
-              gameActive={gameActive}
-              players={players}
-            />
-          </View>
+            <View style={styles.centerPanel}>
+              <Court
+                courtPlayers={courtPlayers}
+                positions={POSITIONS}
+                onDrop={handleDrop}
+                onRemoveFromCourt={removeFromCourt}
+                onAddSubstitution={addSubstitution}
+                benchPlayers={benchPlayers}
+                gameActive={gameActive}
+                players={players}
+              />
+            </View>
 
-          <View style={styles.rightPanel}>
-            <SubstitutionManager
-              substitutions={pendingSubstitutions}
-              onRemoveSubstitution={removeSubstitution}
-              onExecuteSubstitutions={executeSubstitutions}
-            />
+            <View style={styles.rightPanel}>
+              <SubstitutionManager
+                substitutions={pendingSubstitutions}
+                onRemoveSubstitution={removeSubstitution}
+                onExecuteSubstitutions={executeSubstitutions}
+              />
+            </View>
           </View>
-        </View>
+        ) : (
+          // iPhone: Single panel with tabs
+          <>
+            <View style={styles.mobileContent}>
+              {activeTab === 'bench' && (
+                <Bench
+                  players={benchPlayers}
+                  onDeletePlayer={deletePlayer}
+                />
+              )}
+              {activeTab === 'court' && (
+                <Court
+                  courtPlayers={courtPlayers}
+                  positions={POSITIONS}
+                  onDrop={handleDrop}
+                  onRemoveFromCourt={removeFromCourt}
+                  onAddSubstitution={addSubstitution}
+                  benchPlayers={benchPlayers}
+                  gameActive={gameActive}
+                  players={players}
+                />
+              )}
+              {activeTab === 'subs' && (
+                <SubstitutionManager
+                  substitutions={pendingSubstitutions}
+                  onRemoveSubstitution={removeSubstitution}
+                  onExecuteSubstitutions={executeSubstitutions}
+                />
+              )}
+            </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Version {VERSION}</Text>
-        </View>
+            {/* Tab Bar for iPhone */}
+            <View style={styles.tabBar}>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'bench' && styles.activeTab]}
+                onPress={() => {
+                  setActiveTab('bench');
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+              >
+                <Text style={[styles.tabIcon, activeTab === 'bench' && styles.activeTabIcon]}>👥</Text>
+                <Text style={[styles.tabLabel, activeTab === 'bench' && styles.activeTabLabel]}>
+                  Bench
+                </Text>
+                {benchPlayers.length > 0 && (
+                  <View style={styles.tabBadge}>
+                    <Text style={styles.tabBadgeText}>{benchPlayers.length}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'court' && styles.activeTab]}
+                onPress={() => {
+                  setActiveTab('court');
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+              >
+                <Text style={[styles.tabIcon, activeTab === 'court' && styles.activeTabIcon]}>🏀</Text>
+                <Text style={[styles.tabLabel, activeTab === 'court' && styles.activeTabLabel]}>
+                  Court
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'subs' && styles.activeTab]}
+                onPress={() => {
+                  setActiveTab('subs');
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+              >
+                <Text style={[styles.tabIcon, activeTab === 'subs' && styles.activeTabIcon]}>⚡</Text>
+                <Text style={[styles.tabLabel, activeTab === 'subs' && styles.activeTabLabel]}>
+                  Subs
+                </Text>
+                {pendingSubstitutions.length > 0 && (
+                  <View style={styles.tabBadge}>
+                    <Text style={styles.tabBadgeText}>{pendingSubstitutions.length}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
+        {/* Footer - Only show on iPad */}
+        {isTablet && (
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Version {VERSION}</Text>
+          </View>
+        )}
       </SafeAreaView>
     </GestureHandlerRootView>
   );
@@ -457,7 +553,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#5568d3',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
     flex: 1,
@@ -521,6 +617,64 @@ const styles = StyleSheet.create({
   footerText: {
     color: '#999',
     fontSize: 12,
+  },
+  // Mobile (iPhone) Layout Styles
+  mobileContent: {
+    flex: 1,
+    padding: 10,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+    paddingTop: 10,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    position: 'relative',
+  },
+  activeTab: {
+    borderTopWidth: 2,
+    borderTopColor: '#667eea',
+  },
+  tabIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+    opacity: 0.5,
+  },
+  activeTabIcon: {
+    opacity: 1,
+  },
+  tabLabel: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: '500',
+  },
+  activeTabLabel: {
+    color: '#667eea',
+    fontWeight: '600',
+  },
+  tabBadge: {
+    position: 'absolute',
+    top: 4,
+    right: '25%',
+    backgroundColor: '#ff6b6b',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
+  tabBadgeText: {
+    color: 'white',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
 });
 
