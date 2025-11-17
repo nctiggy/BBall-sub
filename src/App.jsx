@@ -324,13 +324,24 @@ function App() {
           onGameControl={() => setIsGameControlModalOpen(true)}
         />
         <h1>🏀 Basketball Substitution Manager</h1>
-        <button
-          className={`game-toggle-button ${gameActive ? 'active' : 'paused'}`}
-          onClick={toggleGame}
-          title={gameActive ? 'Pause Game Clock' : 'Start Game Clock'}
-        >
-          {gameActive ? '⏸' : '▶'}
-        </button>
+        <div className="header-actions">
+          {pendingSubstitutions.length > 0 && (
+            <button
+              className="execute-subs-button"
+              onClick={executeSubstitutions}
+              title={`Execute ${pendingSubstitutions.length} pending substitution${pendingSubstitutions.length > 1 ? 's' : ''}`}
+            >
+              ⚡ {pendingSubstitutions.length}
+            </button>
+          )}
+          <button
+            className={`game-toggle-button ${gameActive ? 'active' : 'paused'}`}
+            onClick={toggleGame}
+            title={gameActive ? 'Pause Game Clock' : 'Start Game Clock'}
+          >
+            {gameActive ? '⏸' : '▶'}
+          </button>
+        </div>
       </header>
 
       <PlayerModal

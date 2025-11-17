@@ -26,9 +26,42 @@
   left: 20px;
 }
 
-.game-toggle-button {
+.header-actions {
   position: absolute;
   right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.execute-subs-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #ff9800 0%, #fb8c00 100%);
+  color: white;
+}
+
+.execute-subs-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
+.execute-subs-button:active {
+  transform: translateY(0);
+}
+
+.game-toggle-button {
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -116,11 +149,21 @@
     left: 15px;
   }
 
+  .header-actions {
+    right: 15px;
+    gap: 10px;
+  }
+
+  .execute-subs-button {
+    width: 70px;
+    height: 70px;
+    font-size: 1.4rem;
+  }
+
   .game-toggle-button {
     width: 70px;
     height: 70px;
     font-size: 2.2rem;
-    right: 15px;
   }
 
   .left-panel,
@@ -150,6 +193,34 @@
   /* Substitutions last */
   .right-panel {
     order: 3;
+  }
+}
+
+/* iPad Landscape Mode - Side by side layout */
+@media (min-width: 768px) and (max-width: 1366px) and (orientation: landscape) {
+  .app-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+
+  .left-panel {
+    grid-column: 1;
+    grid-row: 1;
+    order: initial;
+  }
+
+  .center-panel {
+    grid-column: 2;
+    grid-row: 1;
+    order: initial;
+  }
+
+  .right-panel {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    order: initial;
   }
 }
 
