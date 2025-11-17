@@ -4,16 +4,11 @@
     "slug": "basketball-sub-manager",
     "version": "1.4.0",
     "orientation": "default",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#667eea"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourcompany.basketballsub",
@@ -24,13 +19,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#667eea"
       },
       "package": "com.yourcompany.basketballsub"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     },
     "plugins": []
   }
