@@ -103,7 +103,7 @@
   display: grid;
   grid-template-columns: 300px 1fr 350px;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .left-panel,
@@ -113,6 +113,13 @@
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.left-panel {
+  max-height: 800px;
+  overflow: hidden;
 }
 
 .center-panel {
@@ -171,12 +178,14 @@
   .right-panel {
     padding: 25px;
     margin-bottom: 20px;
+    max-height: none;
   }
 
   /* Reorder for better flow on tablets */
   .app-content {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
   }
 
   /* Court first for easy access */
@@ -203,12 +212,14 @@
     grid-template-columns: 300px 1fr;
     grid-template-rows: auto auto;
     gap: 20px;
+    align-items: stretch;
   }
 
   .left-panel {
     grid-column: 1;
     grid-row: 1;
     order: initial;
+    max-height: 700px;
   }
 
   .center-panel {
