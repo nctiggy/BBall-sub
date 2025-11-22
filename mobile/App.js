@@ -55,6 +55,8 @@ function App() {
   const [isGameControlModalOpen, setIsGameControlModalOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState('court'); // 'bench', 'court', 'subs'
+  const [teamFoulsUs, setTeamFoulsUs] = useState(0);
+  const [teamFoulsThem, setTeamFoulsThem] = useState(0);
 
   // Load data on mount
   useEffect(() => {
@@ -71,6 +73,8 @@ function App() {
         });
         setPendingSubstitutions(savedData.pendingSubstitutions || []);
         setGameActive(savedData.gameActive || false);
+        setTeamFoulsUs(savedData.teamFoulsUs || 0);
+        setTeamFoulsThem(savedData.teamFoulsThem || 0);
       }
       setIsLoaded(true);
     };
@@ -84,10 +88,12 @@ function App() {
         players,
         courtPlayers,
         pendingSubstitutions,
-        gameActive
+        gameActive,
+        teamFoulsUs,
+        teamFoulsThem
       });
     }
-  }, [players, courtPlayers, pendingSubstitutions, gameActive, isLoaded]);
+  }, [players, courtPlayers, pendingSubstitutions, gameActive, teamFoulsUs, teamFoulsThem, isLoaded]);
 
   // Reconcile player onCourt status with courtPlayers to ensure consistency
   useEffect(() => {
@@ -360,9 +366,66 @@ function App() {
             onAddPlayer={() => setIsModalOpen(true)}
             onGameControl={() => setIsGameControlModalOpen(true)}
           />
-          <Text style={styles.headerTitle}>
-            {isTablet ? '🏀 Basketball Substitution Manager' : '🏀 Sub Manager'}
-          </Text>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>
+              {isTablet ? '🏀 Basketball Sub Manager' : '🏀 Sub Manager'}
+            </Text>
+            {/* Team Fouls */}
+            <View style={styles.foulCounter}>
+              <View style={styles.foulTeam}>
+                <Text style={styles.foulLabel}>Us</Text>
+                <View style={styles.foulControls}>
+                  <TouchableOpacity
+                    style={styles.foulButton}
+                    onPress={() => {
+                      if (teamFoulsUs > 0) {
+                        setTeamFoulsUs(teamFoulsUs - 1);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                    }}
+                  >
+                    <Text style={styles.foulButtonText}>−</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.foulCount}>{teamFoulsUs}</Text>
+                  <TouchableOpacity
+                    style={styles.foulButton}
+                    onPress={() => {
+                      setTeamFoulsUs(teamFoulsUs + 1);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }}
+                  >
+                    <Text style={styles.foulButtonText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.foulTeam}>
+                <Text style={styles.foulLabel}>Them</Text>
+                <View style={styles.foulControls}>
+                  <TouchableOpacity
+                    style={styles.foulButton}
+                    onPress={() => {
+                      if (teamFoulsThem > 0) {
+                        setTeamFoulsThem(teamFoulsThem - 1);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                    }}
+                  >
+                    <Text style={styles.foulButtonText}>−</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.foulCount}>{teamFoulsThem}</Text>
+                  <TouchableOpacity
+                    style={styles.foulButton}
+                    onPress={() => {
+                      setTeamFoulsThem(teamFoulsThem + 1);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }}
+                  >
+                    <Text style={styles.foulButtonText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
           <View style={styles.headerActions}>
             {pendingSubstitutions.length > 0 && (
               <TouchableOpacity
@@ -552,12 +615,56 @@ const styles = StyleSheet.create({
     borderBottomWidth: 3,
     borderBottomColor: '#5568d3',
   },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
-    flex: 1,
     textAlign: 'center',
+    marginBottom: 5,
+  },
+  foulCounter: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  foulTeam: {
+    alignItems: 'center',
+  },
+  foulLabel: {
+    color: 'white',
+    fontSize: 11,
+    fontWeight: '600',
+    marginBottom: 3,
+    opacity: 0.9,
+  },
+  foulControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  foulButton: {
+    width: 24,
+    height: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  foulButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  foulCount: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    minWidth: 24,
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   headerActions: {
     flexDirection: 'row',
