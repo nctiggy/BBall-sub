@@ -48,6 +48,8 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [gameActive, setGameActive] = useState(savedData?.gameActive || false)
   const [isGameControlModalOpen, setIsGameControlModalOpen] = useState(false)
+  const [teamFoulsUs, setTeamFoulsUs] = useState(savedData?.teamFoulsUs || 0)
+  const [teamFoulsThem, setTeamFoulsThem] = useState(savedData?.teamFoulsThem || 0)
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -55,9 +57,11 @@ function App() {
       players,
       courtPlayers,
       pendingSubstitutions,
-      gameActive
+      gameActive,
+      teamFoulsUs,
+      teamFoulsThem
     })
-  }, [players, courtPlayers, pendingSubstitutions, gameActive])
+  }, [players, courtPlayers, pendingSubstitutions, gameActive, teamFoulsUs, teamFoulsThem])
 
   // Reconcile player onCourt status with courtPlayers to ensure consistency
   useEffect(() => {
@@ -323,7 +327,49 @@ function App() {
           onAddPlayer={() => setIsModalOpen(true)}
           onGameControl={() => setIsGameControlModalOpen(true)}
         />
-        <h1>🏀 Basketball Substitution Manager</h1>
+        <div className="header-center">
+          <h1>🏀 Basketball Substitution Manager</h1>
+          <div className="foul-counter">
+            <div className="foul-team">
+              <span className="foul-label">Us</span>
+              <div className="foul-controls">
+                <button
+                  className="foul-button"
+                  onClick={() => setTeamFoulsUs(Math.max(0, teamFoulsUs - 1))}
+                  disabled={teamFoulsUs === 0}
+                >
+                  −
+                </button>
+                <span className="foul-count">{teamFoulsUs}</span>
+                <button
+                  className="foul-button"
+                  onClick={() => setTeamFoulsUs(teamFoulsUs + 1)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className="foul-team">
+              <span className="foul-label">Them</span>
+              <div className="foul-controls">
+                <button
+                  className="foul-button"
+                  onClick={() => setTeamFoulsThem(Math.max(0, teamFoulsThem - 1))}
+                  disabled={teamFoulsThem === 0}
+                >
+                  −
+                </button>
+                <span className="foul-count">{teamFoulsThem}</span>
+                <button
+                  className="foul-button"
+                  onClick={() => setTeamFoulsThem(teamFoulsThem + 1)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="header-actions">
           {pendingSubstitutions.length > 0 && (
             <button

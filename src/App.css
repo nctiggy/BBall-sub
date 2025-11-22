@@ -15,10 +15,84 @@
   justify-content: center;
 }
 
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
 .app-header h1 {
   color: #333;
   font-size: 2.5rem;
   margin: 0;
+}
+
+.foul-counter {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.foul-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.foul-label {
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.foul-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.foul-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.foul-button:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1);
+}
+
+.foul-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.foul-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.foul-count {
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+  font-family: 'Courier New', monospace;
 }
 
 .menu-container {
