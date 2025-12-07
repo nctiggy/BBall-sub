@@ -139,6 +139,23 @@ function App() {
       return
     }
 
+    // If both players are on court, SWAP their positions
+    if (currentPlayerInPosition && !isPlayerOnBench) {
+      // Find where the dragged player is currently located
+      const draggedPlayerPosition = Object.keys(courtPlayers).find(
+        pos => courtPlayers[pos]?.id === player.id
+      )
+
+      if (draggedPlayerPosition) {
+        // Swap the two players
+        const updatedCourt = { ...courtPlayers }
+        updatedCourt[position] = player
+        updatedCourt[draggedPlayerPosition] = currentPlayerInPosition
+        setCourtPlayers(updatedCourt)
+        return
+      }
+    }
+
     // If player is already on court in a different position, remove them from there
     const updatedCourt = { ...courtPlayers }
     Object.keys(updatedCourt).forEach(pos => {
