@@ -57,6 +57,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('court'); // 'bench', 'court', 'subs'
   const [teamFoulsUs, setTeamFoulsUs] = useState(0);
   const [teamFoulsThem, setTeamFoulsThem] = useState(0);
+  const [selectedPlayer, setSelectedPlayer] = useState(null); // For tap-to-select workflow
 
   // Load data on mount
   useEffect(() => {
@@ -364,6 +365,59 @@ function App() {
     }
   };
 
+  // Handle tap-to-select workflow for players
+  const handlePlayerTap = (player) => {
+    if (selectedPlayer?.id === player.id) {
+      // Tapping same player deselects
+      setSelectedPlayer(null);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else {
+      // Select the player
+      setSelectedPlayer(player);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  };
+
+  // Handle tapping a court position
+  const handlePositionTap = (position) => {
+    if (!selectedPlayer) return;
+
+    const targetPlayer = courtPlayers[position];
+    const selectedIsOnCourt = selectedPlayer.onCourt;
+
+    // Bench player → Empty court position: Move to court
+    if (!selectedIsOnCourt && !targetPlayer) {
+      handleDrop(position, selectedPlayer);
+      setSelectedPlayer(null);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      return;
+    }
+
+    // Bench player → Occupied court position: Create pending substitution
+    if (!selectedIsOnCourt && targetPlayer) {
+      addSubstitution(targetPlayer, selectedPlayer, position);
+      setSelectedPlayer(null);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      return;
+    }
+
+    // Court player → Empty court position: Move to that position
+    if (selectedIsOnCourt && !targetPlayer) {
+      handleDrop(position, selectedPlayer);
+      setSelectedPlayer(null);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      return;
+    }
+
+    // Court player → Occupied court position: Swap positions
+    if (selectedIsOnCourt && targetPlayer) {
+      handleDrop(position, selectedPlayer);
+      setSelectedPlayer(null);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      return;
+    }
+  };
+
   if (!isLoaded) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
@@ -484,6 +538,8 @@ function App() {
               <Bench
                 players={benchPlayers}
                 onDeletePlayer={deletePlayer}
+                selectedPlayer={selectedPlayer}
+                onPlayerTap={handlePlayerTap}
               />
             </View>
 
@@ -497,6 +553,9 @@ function App() {
                 benchPlayers={benchPlayers}
                 gameActive={gameActive}
                 players={players}
+                selectedPlayer={selectedPlayer}
+                onPlayerTap={handlePlayerTap}
+                onPositionTap={handlePositionTap}
               />
             </View>
 
@@ -516,6 +575,8 @@ function App() {
                 <Bench
                   players={benchPlayers}
                   onDeletePlayer={deletePlayer}
+                  selectedPlayer={selectedPlayer}
+                  onPlayerTap={handlePlayerTap}
                 />
               )}
               {activeTab === 'court' && (
@@ -528,6 +589,9 @@ function App() {
                   benchPlayers={benchPlayers}
                   gameActive={gameActive}
                   players={players}
+                  selectedPlayer={selectedPlayer}
+                  onPlayerTap={handlePlayerTap}
+                  onPositionTap={handlePositionTap}
                 />
               )}
               {activeTab === 'subs' && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import * Haptics from 'expo-haptics';
 
 // Map positions to their numbers
 const POSITION_NUMBERS = {
@@ -19,9 +19,7 @@ const formatTime = (milliseconds) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubstitution, benchPlayers, gameActive, players }) {
-  const [showSubMenu, setShowSubMenu] = useState(null);
-  const [showAddMenu, setShowAddMenu] = useState(null);
+function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubstitution, benchPlayers, gameActive, players, selectedPlayer, onPlayerTap, onPositionTap }) {
   const [currentTime, setCurrentTime] = useState(Date.now());
 
   // Update current time every second when game is active
@@ -34,21 +32,6 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
     }
   }, [gameActive]);
 
-  const handleSubstitution = (position, playerIn) => {
-    const playerOut = courtPlayers[position];
-    if (playerOut) {
-      onAddSubstitution(playerOut, playerIn, position);
-      setShowSubMenu(null);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-  };
-
-  const handleAddPlayer = (position, player) => {
-    onDrop(position, player);
-    setShowAddMenu(null);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  };
-
   const handleRemove = (position) => {
     onRemoveFromCourt(position);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -56,7 +39,15 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
 
   return (
     <View style={styles.courtContainer}>
-      <Text style={styles.title}>Basketball Court</Text>
+      <Text style={styles.title}>
+        Basketball Court
+        {selectedPlayer && selectedPlayer.onCourt && (
+          <Text style={styles.titleHint}> - Tap position to swap</Text>
+        )}
+        {selectedPlayer && !selectedPlayer.onCourt && (
+          <Text style={styles.titleHint}> - Tap position to place</Text>
+        )}
+      </Text>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.court}
@@ -65,6 +56,7 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
         {positions.map((position) => {
           const player = courtPlayers[position];
           const fullPlayer = player ? players.find(p => p.id === player.id) : null;
+          const isPlayerSelected = selectedPlayer && fullPlayer && selectedPlayer.id === fullPlayer.id;
 
           let currentStintTime = 0;
           let totalPlayTime = 0;
@@ -77,7 +69,24 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
           }
 
           return (
-            <View key={position} style={[styles.courtPosition, player && styles.occupied]}>
+            <TouchableOpacity
+              key={position}
+              style={[
+                styles.courtPosition,
+                player && styles.occupied,
+                isPlayerSelected && styles.positionSelected
+              ]}
+              onPress={() => {
+                if (player) {
+                  // If there's a player here, select them
+                  onPlayerTap(fullPlayer);
+                } else if (selectedPlayer) {
+                  // If position is empty and we have a selected player, place them here
+                  onPositionTap(position);
+                }
+              }}
+              activeOpacity={0.7}
+            >
               <View style={styles.positionLabel}>
                 <View style={styles.positionNumber}>
                   <Text style={styles.positionNumberText}>{POSITION_NUMBERS[position]}</Text>
@@ -98,72 +107,24 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
                     )}
                   </View>
 
-                  <View style={styles.playerActions}>
-                    <TouchableOpacity
-                      style={styles.subButton}
-                      onPress={() => setShowSubMenu(showSubMenu === position ? null : position)}
-                    >
-                      <Text style={styles.subButtonText}>Sub</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.removeButton}
-                      onPress={() => handleRemove(position)}
-                    >
-                      <Text style={styles.removeButtonText}>×</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {showSubMenu === position && benchPlayers.length > 0 && (
-                    <View style={styles.subMenu}>
-                      <View style={styles.subMenuHeader}>
-                        <Text style={styles.subMenuHeaderText}>Substitute with:</Text>
-                      </View>
-                      <ScrollView style={styles.subMenuScroll} nestedScrollEnabled={true}>
-                        {benchPlayers.map((benchPlayer) => (
-                          <TouchableOpacity
-                            key={benchPlayer.id}
-                            style={styles.subMenuItem}
-                            onPress={() => handleSubstitution(position, benchPlayer)}
-                          >
-                            <Text style={styles.subMenuItemText}>{benchPlayer.name}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  )}
+                  <TouchableOpacity
+                    style={styles.removeButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleRemove(position);
+                    }}
+                  >
+                    <Text style={styles.removeButtonText}>×</Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
-                <>
-                  <TouchableOpacity
-                    style={styles.emptyPosition}
-                    onPress={() => setShowAddMenu(showAddMenu === position ? null : position)}
-                  >
-                    <Text style={styles.emptyPositionText}>
-                      {benchPlayers.length > 0 ? 'Tap to add player' : 'No players available'}
-                    </Text>
-                  </TouchableOpacity>
-
-                  {showAddMenu === position && benchPlayers.length > 0 && (
-                    <View style={styles.addMenu}>
-                      <View style={styles.addMenuHeader}>
-                        <Text style={styles.addMenuHeaderText}>Select player:</Text>
-                      </View>
-                      <ScrollView style={styles.addMenuScroll} nestedScrollEnabled={true}>
-                        {benchPlayers.map((benchPlayer) => (
-                          <TouchableOpacity
-                            key={benchPlayer.id}
-                            style={styles.addMenuItem}
-                            onPress={() => handleAddPlayer(position, benchPlayer)}
-                          >
-                            <Text style={styles.addMenuItemText}>{benchPlayer.name}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  )}
-                </>
+                <View style={styles.emptyPosition}>
+                  <Text style={styles.emptyPositionText}>
+                    {selectedPlayer ? 'Tap to place here' : 'Empty'}
+                  </Text>
+                </View>
               )}
-            </View>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>
@@ -188,6 +149,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
+  titleHint: {
+    fontSize: 14,
+    fontWeight: 'normal',
+    color: '#667eea',
+    fontStyle: 'italic',
+  },
   scrollView: {
     flex: 1,
   },
@@ -208,6 +175,16 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderColor: '#4caf50',
     backgroundColor: '#e8f5e9',
+  },
+  positionSelected: {
+    borderColor: '#667eea',
+    borderWidth: 4,
+    backgroundColor: '#f0f4ff',
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
   },
   positionLabel: {
     flexDirection: 'row',
@@ -270,22 +247,6 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     letterSpacing: 1,
   },
-  playerActions: {
-    flexDirection: 'row',
-    gap: 5,
-  },
-  subButton: {
-    flex: 1,
-    backgroundColor: '#2196f3',
-    padding: 12,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  subButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 16,
-  },
   removeButton: {
     backgroundColor: '#f44336',
     paddingHorizontal: 15,
@@ -299,66 +260,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  subMenu: {
-    marginTop: 10,
-    backgroundColor: 'white',
-    borderWidth: 2,
-    borderColor: '#2196f3',
-    borderRadius: 8,
-    maxHeight: 200,
-    overflow: 'hidden',
-  },
-  subMenuHeader: {
-    backgroundColor: '#2196f3',
-    padding: 10,
-  },
-  subMenuHeaderText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  subMenuScroll: {
-    maxHeight: 150,
-  },
-  subMenuItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  subMenuItemText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  addMenu: {
-    marginTop: 10,
-    backgroundColor: 'white',
-    borderWidth: 2,
-    borderColor: '#4caf50',
-    borderRadius: 8,
-    maxHeight: 200,
-    overflow: 'hidden',
-  },
-  addMenuHeader: {
-    backgroundColor: '#4caf50',
-    padding: 10,
-  },
-  addMenuHeaderText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  addMenuScroll: {
-    maxHeight: 150,
-  },
-  addMenuItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  addMenuItemText: {
-    fontSize: 16,
-    color: '#333',
   },
 });
 

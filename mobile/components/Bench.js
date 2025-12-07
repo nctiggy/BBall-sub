@@ -9,8 +9,11 @@ const formatTime = (milliseconds) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-function Bench({ players, onDeletePlayer }) {
-  const handleDeleteClick = (player) => {
+function Bench({ players, onDeletePlayer, selectedPlayer, onPlayerTap }) {
+  const handleDeleteClick = (player, event) => {
+    // Stop propagation to prevent selecting the player
+    event?.stopPropagation?.();
+
     Alert.alert(
       'Delete Player',
       `Are you sure you want to delete ${player.name} from the team?`,
@@ -30,7 +33,12 @@ function Bench({ players, onDeletePlayer }) {
 
   return (
     <View style={styles.bench}>
-      <Text style={styles.title}>Bench ({players.length})</Text>
+      <Text style={styles.title}>
+        Bench ({players.length})
+        {selectedPlayer && !selectedPlayer.onCourt && (
+          <Text style={styles.titleHint}> - Tap court position</Text>
+        )}
+      </Text>
       <ScrollView
         style={styles.benchPlayers}
         contentContainerStyle={styles.benchPlayersContent}
@@ -42,27 +50,35 @@ function Bench({ players, onDeletePlayer }) {
             <Text style={styles.emptyBenchHint}>Add players above or remove them from the court</Text>
           </View>
         ) : (
-          players.map((player) => (
-            <View key={player.id} style={styles.benchPlayer}>
-              <View style={styles.playerAvatar}>
-                <Text style={styles.playerAvatarText}>
-                  {player.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <View style={styles.playerDetails}>
-                <Text style={styles.playerName}>{player.name}</Text>
-                <Text style={styles.playerTotalTime}>
-                  Total: {formatTime(player.totalTimeOnCourt || 0)}
-                </Text>
-              </View>
+          players.map((player) => {
+            const isSelected = selectedPlayer?.id === player.id;
+            return (
               <TouchableOpacity
-                style={styles.deletePlayer}
-                onPress={() => handleDeleteClick(player)}
+                key={player.id}
+                style={[styles.benchPlayer, isSelected && styles.benchPlayerSelected]}
+                onPress={() => onPlayerTap(player)}
+                activeOpacity={0.7}
               >
-                <Text style={styles.deletePlayerText}>×</Text>
+                <View style={styles.playerAvatar}>
+                  <Text style={styles.playerAvatarText}>
+                    {player.name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.playerDetails}>
+                  <Text style={styles.playerName}>{player.name}</Text>
+                  <Text style={styles.playerTotalTime}>
+                    Total: {formatTime(player.totalTimeOnCourt || 0)}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.deletePlayer}
+                  onPress={(e) => handleDeleteClick(player, e)}
+                >
+                  <Text style={styles.deletePlayerText}>×</Text>
+                </TouchableOpacity>
               </TouchableOpacity>
-            </View>
-          ))
+            );
+          })
         )}
       </ScrollView>
     </View>
@@ -84,6 +100,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+  },
+  titleHint: {
+    fontSize: 14,
+    fontWeight: 'normal',
+    color: '#667eea',
+    fontStyle: 'italic',
   },
   benchPlayers: {
     flex: 1,
@@ -113,6 +135,16 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: '#667eea',
     borderRadius: 8,
+  },
+  benchPlayerSelected: {
+    backgroundColor: '#4caf50',
+    borderWidth: 3,
+    borderColor: '#ffffff',
+    shadowColor: '#4caf50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
   },
   playerAvatar: {
     width: 40,
