@@ -12,6 +12,13 @@
   flex-shrink: 0;
 }
 
+.bench h2 .hint-text {
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: normal;
+  font-style: italic;
+}
+
 .bench-players {
   display: flex;
   flex-direction: column;
@@ -87,6 +94,13 @@
   opacity: 0.6;
   transform: scale(1.05);
   box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+}
+
+.bench-player.selected {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 3px #4caf50, 0 8px 20px rgba(76, 175, 80, 0.5);
+  transform: translateX(5px);
 }
 
 .player-avatar {

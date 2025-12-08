@@ -8,7 +8,7 @@ const formatTime = (milliseconds) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-function Bench({ players, onDeletePlayer }) {
+function Bench({ players, onDeletePlayer, selectedPlayer, onPlayerClick }) {
   const handleDragStart = (e, player) => {
     e.dataTransfer.setData('player', JSON.stringify(player))
     // Store player data globally for touch devices
@@ -63,7 +63,12 @@ function Bench({ players, onDeletePlayer }) {
 
   return (
     <div className="bench">
-      <h2>Bench ({players.length})</h2>
+      <h2>
+        Bench ({players.length})
+        {selectedPlayer && !selectedPlayer.onCourt && (
+          <span className="hint-text"> - Click court position</span>
+        )}
+      </h2>
       <div className="bench-players">
         {players.length === 0 ? (
           <div className="empty-bench">
@@ -71,16 +76,19 @@ function Bench({ players, onDeletePlayer }) {
             <p className="hint">Add players above or remove them from the court</p>
           </div>
         ) : (
-          players.map((player) => (
-            <div
-              key={player.id}
-              className="bench-player"
-              draggable
-              onDragStart={(e) => handleDragStart(e, player)}
-              onTouchStart={(e) => handleTouchStart(e, player)}
-              onTouchMove={(e) => handleTouchMove(e, player)}
-              onTouchEnd={handleTouchEnd}
-            >
+          players.map((player) => {
+            const isSelected = selectedPlayer?.id === player.id
+            return (
+              <div
+                key={player.id}
+                className={`bench-player ${isSelected ? 'selected' : ''}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, player)}
+                onTouchStart={(e) => handleTouchStart(e, player)}
+                onTouchMove={(e) => handleTouchMove(e, player)}
+                onTouchEnd={handleTouchEnd}
+                onClick={() => onPlayerClick(player)}
+              >
               <div className="player-avatar">
                 {player.name.charAt(0).toUpperCase()}
               </div>
@@ -92,7 +100,10 @@ function Bench({ players, onDeletePlayer }) {
               </div>
               <button
                 className="delete-player"
-                onClick={() => handleDeleteClick(player)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDeleteClick(player)
+                }}
                 onTouchStart={(e) => e.stopPropagation()}
                 onTouchEnd={(e) => e.stopPropagation()}
                 title="Delete player"
@@ -100,7 +111,8 @@ function Bench({ players, onDeletePlayer }) {
                 ×
               </button>
             </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>

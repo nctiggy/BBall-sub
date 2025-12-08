@@ -18,9 +18,8 @@ const formatTime = (milliseconds) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubstitution, benchPlayers, gameActive, players }) {
+function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubstitution, benchPlayers, gameActive, players, selectedPlayer, onPlayerClick, onPositionClick }) {
   const [dragOverPosition, setDragOverPosition] = useState(null)
-  const [showSubMenu, setShowSubMenu] = useState(null)
   const [currentTime, setCurrentTime] = useState(Date.now())
 
   // Update current time every second when game is active
@@ -82,17 +81,17 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
     setDragOverPosition(null)
   }
 
-  const handleSubstitution = (position, playerIn) => {
-    const playerOut = courtPlayers[position]
-    if (playerOut) {
-      onAddSubstitution(playerOut, playerIn, position)
-      setShowSubMenu(null)
-    }
-  }
-
   return (
     <div className="court-container">
-      <h2>Basketball Court</h2>
+      <h2>
+        Basketball Court
+        {selectedPlayer && selectedPlayer.onCourt && (
+          <span className="hint-text"> - Click position to swap</span>
+        )}
+        {selectedPlayer && !selectedPlayer.onCourt && (
+          <span className="hint-text"> - Click position to place</span>
+        )}
+      </h2>
       <div className="court">
         {positions.map((position) => {
           const player = courtPlayers[position]
@@ -100,6 +99,7 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
 
           // Get full player data including time tracking
           const fullPlayer = player ? players.find(p => p.id === player.id) : null
+          const isPlayerSelected = selectedPlayer && fullPlayer && selectedPlayer.id === fullPlayer.id
 
           // Calculate current stint time
           let currentStintTime = 0
@@ -118,12 +118,19 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
           return (
             <div
               key={position}
-              className={`court-position ${isHovered ? 'drag-over' : ''} ${player ? 'occupied' : 'empty'}`}
+              className={`court-position ${isHovered ? 'drag-over' : ''} ${player ? 'occupied' : 'empty'} ${isPlayerSelected ? 'selected' : ''}`}
               onDragOver={(e) => handleDragOver(e, position)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, position)}
               onTouchMove={(e) => handleTouchMove(e, position)}
               onTouchEnd={(e) => handleTouchEnd(e, position)}
+              onClick={() => {
+                if (player) {
+                  onPlayerClick(fullPlayer)
+                } else if (selectedPlayer) {
+                  onPositionClick(position)
+                }
+              }}
             >
               <div className="position-label">
                 <span className="position-number">{POSITION_NUMBERS[position]}</span> {position}
@@ -138,44 +145,21 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
                       </span>
                     )}
                   </div>
-                  <div className="player-actions">
-                    <button
-                      className="sub-button"
-                      onClick={() => setShowSubMenu(showSubMenu === position ? null : position)}
-                      onTouchStart={(e) => e.stopPropagation()}
-                      onTouchEnd={(e) => e.stopPropagation()}
-                    >
-                      Sub
-                    </button>
-                    <button
-                      className="remove-button"
-                      onClick={() => onRemoveFromCourt(position)}
-                      onTouchStart={(e) => e.stopPropagation()}
-                      onTouchEnd={(e) => e.stopPropagation()}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  {showSubMenu === position && benchPlayers.length > 0 && (
-                    <div className="sub-menu">
-                      <div className="sub-menu-header">Substitute with:</div>
-                      {benchPlayers.map((benchPlayer) => (
-                        <div
-                          key={benchPlayer.id}
-                          className="sub-menu-item"
-                          onClick={() => handleSubstitution(position, benchPlayer)}
-                          onTouchStart={(e) => e.stopPropagation()}
-                          onTouchEnd={(e) => e.stopPropagation()}
-                        >
-                          {benchPlayer.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <button
+                    className="remove-button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRemoveFromCourt(position)
+                    }}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onTouchEnd={(e) => e.stopPropagation()}
+                  >
+                    ×
+                  </button>
                 </div>
               ) : (
                 <div className="empty-position">
-                  <p>Drag player here</p>
+                  <p>{selectedPlayer ? 'Click to place here' : 'Drag player here or click to select'}</p>
                 </div>
               )}
             </div>

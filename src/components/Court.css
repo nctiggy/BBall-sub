@@ -14,6 +14,13 @@
   flex-shrink: 0;
 }
 
+.court-container h2 .hint-text {
+  font-size: 1rem;
+  color: #667eea;
+  font-weight: normal;
+  font-style: italic;
+}
+
 .court {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -35,6 +42,7 @@
   transition: all 0.3s;
   position: relative;
   touch-action: none;
+  cursor: pointer;
 }
 
 .court-position.drag-over {
@@ -47,6 +55,14 @@
   border-style: solid;
   border-color: #4caf50;
   background: linear-gradient(135deg, #ffffff 0%, #e8f5e9 100%);
+}
+
+.court-position.selected {
+  border-color: #667eea;
+  border-width: 4px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8f1ff 100%);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), 0 8px 20px rgba(102, 126, 234, 0.4);
+  transform: scale(1.03);
 }
 
 .position-label {
@@ -121,82 +137,24 @@
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
-.player-actions {
-  display: flex;
-  gap: 5px;
-}
-
-.sub-button,
 .remove-button {
-  flex: 1;
-  padding: 8px;
+  padding: 8px 12px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s;
   touch-action: auto;
-}
-
-.sub-button {
-  background: #2196f3;
-  color: white;
-}
-
-.sub-button:hover {
-  background: #1976d2;
-  transform: translateY(-1px);
-}
-
-.remove-button {
   background: #f44336;
   color: white;
   font-size: 1.2rem;
-  max-width: 40px;
+  align-self: center;
+  min-width: 40px;
 }
 
 .remove-button:hover {
   background: #d32f2f;
-  transform: translateY(-1px);
-}
-
-.sub-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 2px solid #2196f3;
-  border-radius: 8px;
-  margin-top: 5px;
-  z-index: 10;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.sub-menu-header {
-  padding: 10px;
-  background: #2196f3;
-  color: white;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.sub-menu-item {
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #eee;
-  transition: background 0.2s;
-  touch-action: auto;
-}
-
-.sub-menu-item:hover {
-  background: #f5f5f5;
-}
-
-.sub-menu-item:last-child {
-  border-bottom: none;
+  transform: scale(1.1);
 }
 
 /* Tablet optimizations */
@@ -232,14 +190,9 @@
     font-size: 1.1rem;
   }
 
-  .sub-button,
   .remove-button {
     padding: 12px;
-    font-size: 1rem;
-  }
-
-  .remove-button {
-    max-width: 50px;
     font-size: 1.4rem;
+    min-width: 50px;
   }
 }

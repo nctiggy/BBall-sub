@@ -50,6 +50,7 @@ function App() {
   const [isGameControlModalOpen, setIsGameControlModalOpen] = useState(false)
   const [teamFoulsUs, setTeamFoulsUs] = useState(savedData?.teamFoulsUs || 0)
   const [teamFoulsThem, setTeamFoulsThem] = useState(savedData?.teamFoulsThem || 0)
+  const [selectedPlayer, setSelectedPlayer] = useState(null) // For tap-to-select workflow
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -337,6 +338,53 @@ function App() {
     }
   }
 
+  // Handle tap-to-select workflow for players
+  const handlePlayerClick = (player) => {
+    if (selectedPlayer?.id === player.id) {
+      // Clicking same player deselects
+      setSelectedPlayer(null)
+    } else {
+      // Select the player
+      setSelectedPlayer(player)
+    }
+  }
+
+  // Handle clicking a court position
+  const handlePositionClick = (position) => {
+    if (!selectedPlayer) return
+
+    const targetPlayer = courtPlayers[position]
+    const selectedIsOnCourt = selectedPlayer.onCourt
+
+    // Bench player → Empty court position: Move to court
+    if (!selectedIsOnCourt && !targetPlayer) {
+      handleDrop(position, selectedPlayer)
+      setSelectedPlayer(null)
+      return
+    }
+
+    // Bench player → Occupied court position: Create pending substitution
+    if (!selectedIsOnCourt && targetPlayer) {
+      addSubstitution(targetPlayer, selectedPlayer, position)
+      setSelectedPlayer(null)
+      return
+    }
+
+    // Court player → Empty court position: Move to that position
+    if (selectedIsOnCourt && !targetPlayer) {
+      handleDrop(position, selectedPlayer)
+      setSelectedPlayer(null)
+      return
+    }
+
+    // Court player → Occupied court position: Swap positions
+    if (selectedIsOnCourt && targetPlayer) {
+      handleDrop(position, selectedPlayer)
+      setSelectedPlayer(null)
+      return
+    }
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -427,6 +475,8 @@ function App() {
           <Bench
             players={benchPlayers}
             onDeletePlayer={deletePlayer}
+            selectedPlayer={selectedPlayer}
+            onPlayerClick={handlePlayerClick}
           />
         </div>
 
@@ -440,6 +490,9 @@ function App() {
             benchPlayers={benchPlayers}
             gameActive={gameActive}
             players={players}
+            selectedPlayer={selectedPlayer}
+            onPlayerClick={handlePlayerClick}
+            onPositionClick={handlePositionClick}
           />
         </div>
 
