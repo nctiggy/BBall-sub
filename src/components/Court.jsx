@@ -125,10 +125,12 @@ function Court({ courtPlayers, positions, onDrop, onRemoveFromCourt, onAddSubsti
               onTouchMove={(e) => handleTouchMove(e, position)}
               onTouchEnd={(e) => handleTouchEnd(e, position)}
               onClick={() => {
-                if (player) {
-                  onPlayerClick(fullPlayer)
-                } else if (selectedPlayer) {
+                if (selectedPlayer) {
+                  // If we have a selected player, execute the action (sub/swap/move)
                   onPositionClick(position)
+                } else if (player) {
+                  // Otherwise, select the player in this position
+                  onPlayerClick(fullPlayer)
                 }
               }}
             >
